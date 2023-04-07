@@ -1,4 +1,4 @@
-package org.jmoster.generator
+package org.jmonster.codegenerator.generator
 
 import org.springframework.boot.ApplicationArguments
 

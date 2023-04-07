@@ -4,11 +4,11 @@
 
 ## Entity Code Generator
 
-1. 在項目根目錄中執行 Gradle 指令，可以產生一個 jar 檔案。預設情況下，這個檔案會被放置在 /codeGenerator/build/libs 路徑底下。
+1. 在項目根目錄中執行 Gradle 指令，可以產生一個 jar 檔案。預設情況下，這個檔案會被放置在 build/libs 路徑底下。
 
    ```cmd
 
-    ./gradlew :codeGenerator:build
+    ./gradlew build
 
    ```
 
@@ -67,13 +67,13 @@
       |  FIELD  |  `@CreatedDate` |創建時間欄位加上此註解 |
       |  FIELD  |  `@CreatedBy` |創建使用者欄位加上此註解 |
 
-4. 使用範例: 在 /codeGenerator/build/libs 路徑下執行以下指令
+4. 使用範例: 在 build/libs 路徑下執行以下指令
 
    - 通用格式: {version} 版號、{file}: 規格檔案路徑
 
       ```cmd
 
-            java -jar codeGenerator-{version}.jar --source="{file}"
+            java -jar jmonster-{version}.jar --source="{file}"
 
       ```
 
@@ -81,7 +81,7 @@
 
       ```cmd
       
-      java -jar codeGenerator-{version}.jar --source="C:\path\to\file\Shiba.txt" 
+      java -jar jmonster-{version}.jar --source="C:\path\to\file\Shiba.txt" 
 
       ```
 
@@ -89,7 +89,7 @@
 
       ```cmd
 
-      java -jar codeGenerator-{version}.jar --source="C:\path\to\file\Shiba.txt" --destination="C:\path\to\entity\cute\animal" 
+      java -jar jmonster-{version}.jar --source="C:\path\to\file\Shiba.txt" --destination="C:\path\to\entity\cute\animal" 
 
       ```
 
@@ -97,7 +97,7 @@
 
       ```cmd
 
-      java -jar codeGenerator-{version}.jar --source="C:\path\to\file\Shiba.txt"   --source="C:\path\to\file\Cat.txt" 
+      java -jar jmonster-{version}.jar --source="C:\path\to\file\Shiba.txt"   --source="C:\path\to\file\Cat.txt" 
 
       ```
 
@@ -105,7 +105,7 @@
 
       ```cmd
 
-      java -jar codeGenerator-{version}.jar \ 
+      java -jar jmonster-{version}.jar \ 
       --source="C:\path\to\file\Shiba.txt" \ 
       --source="C:\path\to\file\Cat.txt" \ 
       --destination="C:\path\to\entity\cute\animal" 

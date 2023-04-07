@@ -7,8 +7,8 @@ plugins {
 	kotlin("plugin.spring") version "1.7.22"
 }
 
-group = "me.ken"
-version = "0.0.1-SNAPSHOT"
+group = "org.jmonster"
+version = "1.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {

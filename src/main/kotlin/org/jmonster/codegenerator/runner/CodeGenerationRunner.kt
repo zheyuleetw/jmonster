@@ -1,7 +1,7 @@
-package org.jmoster.runner
+package org.jmonster.codegenerator.runner
 
-import org.jmoster.generator.CodeGenerator
-import org.jmoster.generator.EntityCodeGenerator
+import org.jmonster.codegenerator.generator.CodeGenerator
+import org.jmonster.codegenerator.generator.EntityCodeGenerator
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
