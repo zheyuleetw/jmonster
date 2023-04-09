@@ -61,9 +61,25 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
+            },
+            "local": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.local.ts"
+                }
+              ]
+            },
+            "test-tw": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.test-tw.ts"
+                }
+              ]
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "local"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -73,6 +89,12 @@
             },
             "development": {
               "browserTarget": "jmonster-ui:build:development"
+            },
+            "local": {
+              "browserTarget": "jmonster-ui:build:local"
+            },
+            "test-tw": {
+              "browserTarget": "jmonster-ui:build:test-tw"
             }
           },
           "defaultConfiguration": "development"

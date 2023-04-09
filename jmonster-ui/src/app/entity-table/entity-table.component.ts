@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { MatTable } from '@angular/material/table';
 import { HttpClient } from '@angular/common/http';
-import { AngularEditorConfig } from '@kolkov/angular-editor';
+import { environment } from '../../environments/environment';
 
 export interface Column {
   key: string;
@@ -115,7 +115,7 @@ export class EntityTableComponent {
       columns: data
     }
 
-    this.http.post('http://localhost:8999/entity/table', requstBody, { responseType: 'arraybuffer' }).subscribe((response: any) => {
+    this.http.post(`${environment.apiUrl}/entity/table`, requstBody, { responseType: 'arraybuffer' }).subscribe((response: any) => {
       // TODO 處理錯誤訊息
       // TODO 設定環境變數
       const blob = new Blob([response], { type: 'application/octet-stream' });
@@ -134,7 +134,7 @@ export class EntityTableComponent {
     // TODO 上傳檔案
 
     console.log(this.text)
-    this.http.post(`http://localhost:8999/entity/text?tableName=${this.tableName}`, this.text, { responseType: 'arraybuffer' }).subscribe((response: any) => {
+    this.http.post(`${environment.apiUrl}/entity/text?tableName=${this.tableName}`, this.text, { responseType: 'arraybuffer' }).subscribe((response: any) => {
       // TODO 處理錯誤訊息
       const blob = new Blob([response], { type: 'application/octet-stream' });
       const url = window.URL.createObjectURL(blob);
