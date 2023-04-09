@@ -1,8 +1,8 @@
-package org.jmoster.model.dto.entity
+package org.jmonster.codegenerator.model.dto.entity
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
-import org.jmoster.model.dto.common.RestDto
+import org.jmonster.codegenerator.model.dto.common.RestDto
 
 data class EntityCodeGenerateRequestDto(
     @field:NotBlank(message = "Please input table name")

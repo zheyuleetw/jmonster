@@ -1,6 +1,6 @@
 package org.jmonster.codegenerator.generator
 
-import org.jmoster.model.dto.common.RestDto
+import org.jmonster.codegenerator.model.dto.common.RestDto
 import org.springframework.boot.ApplicationArguments
 import java.io.File
 

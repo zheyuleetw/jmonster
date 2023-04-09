@@ -1,10 +1,10 @@
-package org.jmoster.controller
+package org.jmonster.codegenerator.controller
 
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
-import org.jmoster.generator.EntityCodeGenerator
-import org.jmoster.model.dto.entity.EntityCodeGenerateRequestDto
+import org.jmonster.codegenerator.generator.EntityCodeGenerator
+import org.jmonster.codegenerator.model.dto.entity.EntityCodeGenerateRequestDto
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity

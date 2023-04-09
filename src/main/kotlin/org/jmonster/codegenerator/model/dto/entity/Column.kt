@@ -1,4 +1,4 @@
-package org.jmoster.model.dto.entity
+package org.jmonster.codegenerator.model.dto.entity
 
 data class Column(
     val key: String,
