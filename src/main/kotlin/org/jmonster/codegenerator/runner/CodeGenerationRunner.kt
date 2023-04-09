@@ -11,12 +11,12 @@ class CodeGenerationRunner : ApplicationRunner {
 
     override fun run(args: ApplicationArguments?) {
 
-        if (args == null) {
+        if (args == null || args.optionNames.isNullOrEmpty()) {
             println("Generate NOTHING")
             return
         }
 
-        args.getOptionValues("type")?.firstOrNull()?.let {
+        args.getOptionValues("type").firstOrNull()?.let {
             val generator: CodeGenerator? = when (it) {
                 "entity" -> EntityCodeGenerator()
                 else -> null

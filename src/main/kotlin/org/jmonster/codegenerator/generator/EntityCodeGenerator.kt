@@ -1,7 +1,12 @@
-package org.jmonster.codegenerator.generator
+package org.jmoster.generator
 
+import org.jmoster.model.dto.common.RestDto
+import org.jmoster.model.dto.entity.EntityCodeGenerateRequestDto
 import org.springframework.boot.ApplicationArguments
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+
 
 class EntityCodeGenerator : CodeGenerator {
 
@@ -246,6 +251,72 @@ class EntityCodeGenerator : CodeGenerator {
         }
         if (!preCheck(args)) return
         output()
+    }
+
+    override fun generate(dto: RestDto): File {
+        if (dto !is EntityCodeGenerateRequestDto) throw Exception("ERR_UNKNOWN")
+
+        // [0] -> PK or UK or empty
+        // [1] -> name
+        // [2] -> type
+        // [3] -> null or nonnull
+        // [4] -> description
+        val columns = dto.columns.map {
+            listOf(
+                it.key.trim(),
+                it.name.trim(),
+                it.type.trim(),
+                it.nullable.trim(),
+                it.description.trim()
+            )
+        }
+
+        enversAudit = dto.enversAudit
+        content[dto.tableName] = columns
+        uniqueColumnCount[dto.tableName] = columns.filter { it[0].equals("UK", true) }.size
+
+
+        val code = composeCode(
+            dto.tableName,
+            this::generatePackageCode,
+            this::generateImportCode,
+            this::generateAnnotationCode,
+            this::generateConstructorCode,
+            this::generateBodyCode,
+            this::generatePkCode
+        )
+
+        //TODO generate code in other languages
+        val tempFile: Path = Files.createTempFile(dto.tableName, ".kt")
+        Files.write(tempFile, listOf(code))
+        return tempFile.toFile()
+
+    }
+
+    override fun generate(tableName: String, text: String): File {
+        // [0] -> PK or UK or empty
+        // [1] -> name
+        // [2] -> type
+        // [3] -> null or nonnull
+        // [4] -> description
+        val contentArg = text.split("\\r?\\n").map { line -> line.split(delimiter).map { it.trim() } }
+        content[tableName] = contentArg
+        uniqueColumnCount[tableName] = contentArg.filter { it[0].equals("UK", true) }.size
+
+        val code = composeCode(
+            tableName,
+            this::generatePackageCode,
+            this::generateImportCode,
+            this::generateAnnotationCode,
+            this::generateConstructorCode,
+            this::generateBodyCode,
+            this::generatePkCode
+        )
+
+        //TODO generate code in other languages
+        val tempFile: Path = Files.createTempFile(tableName, ".kt")
+        Files.write(tempFile, listOf(code))
+        return tempFile.toFile()
     }
 
     private fun output() {
