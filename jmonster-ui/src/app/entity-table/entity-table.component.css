@@ -1,0 +1,90 @@
+.demo-table {
+  width: 80%;
+}
+
+.table-container{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.button-container {
+  display: flex;
+  padding-bottom: 16px;
+  padding-top: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.column-key {
+  width: 50px !important;
+  margin: 10px !important;
+}
+
+.column-name{
+  width: 180px !important;
+}
+
+.column-type{
+  width: 20%;
+}
+
+.column-nullable{
+  width: 5%;
+}
+
+.column-description{
+  width: 10%;
+}
+
+.column-delete{
+  width: 10%;
+}
+
+.mat-header-row {
+  text-align: center !important;
+}
+
+.table-meta-form{
+  display: flex;
+  margin-top: 1%;
+  margin-bottom: 1%;
+  align-items: center;
+  justify-content: space-between;
+  width:30%;
+}
+
+.mat-tab-group{
+  width:90%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+::ng-deep .mat-tab-header {
+  width: 50%;
+}
+
+::ng-deep .mat-tab-body-wrapper {
+  width:90%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.table-text-area-wrapper {
+  margin-top: 1%;
+  width: 500px !important;
+  height: 100% !important;
+}
+
+.table-text-area {
+  margin-top: 1%;
+  width: 100% !important;
+  height: 300px !important;
+}
