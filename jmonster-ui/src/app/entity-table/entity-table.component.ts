@@ -32,6 +32,7 @@ export class EntityTableComponent {
 
   tableMetaForm = new FormGroup({
     tableName: new FormControl(''),
+    enversAudit: new FormControl(''),
   });
 
   columns: Column[] = [

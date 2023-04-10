@@ -5,7 +5,7 @@
       <mat-label>Table Name</mat-label>
       <input  matInput formControlName="tableName" placeholder="請使用camelCase" [(ngModel)]="tableName" required>
     </mat-form-field>
-    <mat-slide-toggle [(ngModel)]="enversAudit">Envers Audit</mat-slide-toggle>
+    <mat-slide-toggle formControlName="enversAudit" [(ngModel)]="enversAudit">Envers Audit</mat-slide-toggle>
   </form>
 
       <div class="button-container">
