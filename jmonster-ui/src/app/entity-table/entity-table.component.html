@@ -1,12 +1,12 @@
 <div class="table-container">
 
-  <div class="table-meta-form">
+  <form class="table-meta-form" [formGroup]="tableMetaForm" >
     <mat-form-field class="example-full-width mat-form-field-with-divider">
       <mat-label>Table Name</mat-label>
-      <input matInput placeholder="請使用camelCase" [(ngModel)]="tableName">
+      <input  matInput formControlName="tableName" placeholder="請使用camelCase" [(ngModel)]="tableName" required>
     </mat-form-field>
     <mat-slide-toggle [(ngModel)]="enversAudit">Envers Audit</mat-slide-toggle>
-  </div>
+  </form>
 
       <div class="button-container">
         <button mat-raised-button color="primary" (click)="addEmptyColumn()" class="demo-button">

@@ -8,23 +8,20 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatTableModule } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatButtonModule } from '@angular/material/button'
-import { MatInputModule } from '@angular/material/input'
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle'
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import { ToolBarComponent } from './tool-bar/tool-bar.component';
 import { HttpClientModule } from '@angular/common/http';
 import { MatTabsModule } from '@angular/material/tabs';
 import { AngularEditorModule } from '@kolkov/angular-editor';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    EntityTableComponent,
-    ToolBarComponent
-  ],
+  declarations: [AppComponent, EntityTableComponent, ToolBarComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -40,9 +37,10 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
     HttpClientModule,
     MatTabsModule,
     AngularEditorModule,
-    FormsModule
+    ReactiveFormsModule,
+    FormsModule,
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
