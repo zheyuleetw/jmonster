@@ -165,7 +165,7 @@ class EntityCodeGenerator : CodeGenerator {
         val notNull = column[3].equals("notnull", true)
 
 
-        if (column[2].contains("varchar")) def.add(
+        if (column[2].contains("varchar", true)) def.add(
             // example: get 200 from varchar(200)
             "length = ${
                 column[2].substring(column[2].indexOf("(") + 1).replace(")", "")

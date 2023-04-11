@@ -24,9 +24,9 @@ export interface EntityCodeGenerateRequest {
   styleUrls: ['./entity-table.component.css'],
 })
 export class EntityTableComponent {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   @ViewChild(MatTable) table!: MatTable<Column>;
 
@@ -153,10 +153,7 @@ export class EntityTableComponent {
   generateByTable() {
     if (!this.tableMetaForm.controls.tableName.valid) return;
 
-    this.isGenerateButtonDisabled = true;
-    setTimeout(() => {
-      this.isGenerateButtonDisabled = false;
-    }, 5000);
+    this.closeButtonTemporarily()
 
     const data: Column[] = this.columns.map((column, index) => {
       var type: string;
@@ -165,6 +162,7 @@ export class EntityTableComponent {
       } else {
         type = column.type;
       }
+
       return {
         key: column.key,
         name: column.name,
@@ -174,14 +172,14 @@ export class EntityTableComponent {
       };
     });
 
-    const requstBody: EntityCodeGenerateRequest = {
+    const requestBody: EntityCodeGenerateRequest = {
       tableName: this.tableName,
       enversAudit: this.enversAudit,
       columns: data,
     };
 
     this.http
-      .post(`${environment.apiUrl}/entity/table`, requstBody, {
+      .post(`${environment.apiUrl}/entity/table`, requestBody, {
         responseType: 'arraybuffer',
       })
       .subscribe((response: any) => {
@@ -197,6 +195,14 @@ export class EntityTableComponent {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       });
+  }
+
+  private closeButtonTemporarily() {
+
+    this.isGenerateButtonDisabled = true;
+    setTimeout(() => {
+      this.isGenerateButtonDisabled = false;
+    }, 5000);
   }
 
   private checkTableName(): boolean {
