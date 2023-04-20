@@ -78,6 +78,8 @@ export class EntityTableComponent {
   enversAudit: boolean = true;
   tableNameValid: boolean = true;
   varcharLengthMap: Map<number, string> = new Map();
+  numericPrecisionMap: Map<number, string> = new Map();
+  numericScaleMap: Map<number, string> = new Map();
   isGenerateButtonDisabled: boolean = false;
 
   addEmptyColumn() {
@@ -140,6 +142,16 @@ export class EntityTableComponent {
     this.varcharLengthMap.set(index, (target as HTMLInputElement).value);
   }
 
+  onNumericPrecisionChanged(target: EventTarget | null, index: number) {
+    if (target == null) return;
+    this.numericPrecisionMap.set(index, (target as HTMLInputElement).value);
+  }
+
+  onNumericScaleChanged(target: EventTarget | null, index: number) {
+    if (target == null) return;
+    this.numericScaleMap.set(index, (target as HTMLInputElement).value);
+  }
+
   removeColumn() {
     this.columns.pop();
     this.table.renderRows();
@@ -159,6 +171,9 @@ export class EntityTableComponent {
       var type: string;
       if (column.type === 'VARCHAR') {
         type = `${column.type}(${this.varcharLengthMap.get(index)})`;
+      } else if (column.type === 'NUMERIC' || column.type === 'DECIMAL') {
+        type = `${column.type}(${this.numericPrecisionMap.get(index)},${this.numericScaleMap.get(index)})`;
+
       } else {
         type = column.type;
       }
