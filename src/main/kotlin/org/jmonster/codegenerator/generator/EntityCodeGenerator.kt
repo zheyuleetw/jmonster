@@ -99,7 +99,7 @@ class EntityCodeGenerator : CodeGenerator {
 
     }
 
-    fun generateConstructorCode(className: String): String {
+    private fun generateConstructorCode(className: String): String {
         val constructorCode = StringBuilder()
         constructorCode.appendLine("data class ${className}(")
         content[className]?.filter { !metaColumns.contains(it[1]) }
@@ -108,7 +108,7 @@ class EntityCodeGenerator : CodeGenerator {
         return constructorCode.toString()
     }
 
-    fun generateBodyCode(className: String): String {
+    private fun generateBodyCode(className: String): String {
         val bodyCode = StringBuilder()
         bodyCode.appendLine("{")
         content[className]?.filter { metaColumns.contains(it[1]) }
@@ -134,15 +134,30 @@ class EntityCodeGenerator : CodeGenerator {
 
         return when (dbType.uppercase()) {
             "UUID" -> "UUID"
-            "JSONB" -> "I18nNameMap"
+            "JSONB(I18NNAMEMAP)" -> "I18nNameMap"
             "BOOL" -> "Boolean"
             "TIMESTAMP" -> "LocalDateTime"
             "DATETIME" -> "LocalDateTime"
-            "TEXT" -> "String"
+            "DATE" -> "LocalDate"
             "TIME" -> "LocalTime"
+            "TEXT" -> "String"
             "INT" -> "Int"
+            "BIGINT" -> "Long"
+            "DOUBLE PRECISION", "FLOAT8" -> "Double"
+            "DECIMAL" -> "BigDecimal"
+            "REAL" -> "Float"
+            "BYTEA" -> "ByteArray"
+            "ENUM" -> "String"
+            "JSONB(LIST)" -> "List"
+            "JSONB(MAP)" -> "Map"
             else -> {
-                "String"
+                if (dbType.uppercase().contains("VARCHAR")) {
+                    "String"
+                } else if (dbType.uppercase().contains("NUMERIC") || dbType.uppercase().contains("DECIMAL")) {
+                    "BigDecimal"
+                } else {
+                    "String"
+                }
             }
         }
 
@@ -151,41 +166,75 @@ class EntityCodeGenerator : CodeGenerator {
     private fun getColumnDef(className: String, column: List<String>): String {
         val columnBlock = StringBuilder()
         columnBlock.appendLine(if (column[0].equals("PK", true)) "@Id" else "")
-            .appendLine(if (column[2].equals("JSONB", true)) "@Type(type = \"jsonb\")" else "")
+            .appendLine(if (column[2].uppercase().contains("JSONB", true)) "@Type(type = \"jsonb\")" else "")
             .appendLine(getColumn(className, column)).appendLine(getField(column))
         return columnBlock.toString()
     }
 
     private fun getColumn(className: String, column: List<String>): String {
+        buildList {
+            addNameDef(column)
+            addVarcharLengthDef(column)
+            addNumericPrecisionAndScaleDef(column)
+            addNullableDef(column)
+            addUpdatableDef(column)
+            addUniqueDef(className, column)
+            addJsonbColumnDef(column)
+        }.let {
+            return "@Column(${it.joinToString(", ")})"
+        }
+    }
 
-        val def = mutableListOf<String>()
+    private fun MutableList<String>.addNameDef(column: List<String>) {
+        this.add("name = \"${column[1]}\"")
+    }
 
-        def.add("name = \"${column[1]}\"")
+    private fun MutableList<String>.addVarcharLengthDef(column: List<String>) {
+        if (column[2].contains("varchar", true)) {
+            val regex = Regex("(\\d+)")
+            regex.find(column[2])?.let {
+                val (length) = it.groupValues.drop(0)
+                this.add("length=$length")
+            }
+        }
+    }
 
-        val notNull = column[3].equals("notnull", true)
+    private fun MutableList<String>.addNumericPrecisionAndScaleDef(column: List<String>) {
+        if (column[2].contains("decimal", true) || column[2].contains("numeric", true)) {
+            val regex = Regex("(\\d+),(\\d+)")
+            regex.find(column[2])?.let {
+                val values = it.groupValues
+                val precision = values[1]
+                val scale = values[2]
+                this.add("precision=$precision")
+                this.add("scale=$scale")
+            }
+        }
+    }
 
+    private fun MutableList<String>.addNullableDef(column: List<String>) {
+        if (column[3].equals("notnull", true) && column[0] != "PK") this.add("nullable = false")
+    }
 
-        if (column[2].contains("varchar", true)) def.add(
-            // example: get 200 from varchar(200)
-            "length = ${
-                column[2].substring(column[2].indexOf("(") + 1).replace(")", "")
-            }"
-        )
-
-        if (notNull && column[0] != "PK") def.add("nullable = false")
-
+    private fun MutableList<String>.addUpdatableDef(column: List<String>) {
         if (column[1].equals("created_date", true) || column[1].equals(
                 "created_user_id", true
             )
-        ) def.add("updatable = false")
-
-        if (uniqueColumnCount[className] == 1 && column[0].equals("UK", true)) {
-            def.add("unique = true")
+        ) {
+            this.add("updatable = false")
         }
+    }
 
-        if (column[2].equals("JSONB", true)) def.add("columnDefinition = \"jsonb\"")
+    private fun MutableList<String>.addUniqueDef(className: String, column: List<String>) {
+        if (uniqueColumnCount[className] == 1 && column[0].equals("UK", true)) {
+            this.add("unique = true")
+        }
+    }
 
-        return "@Column(${def.joinToString(", ")})"
+    private fun MutableList<String>.addJsonbColumnDef(column: List<String>) {
+        if (column[2].uppercase().contains("JSONB", true)) {
+            this.add("columnDefinition = \"jsonb\"")
+        }
     }
 
     private fun getField(column: List<String>): String {
