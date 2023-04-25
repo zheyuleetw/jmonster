@@ -1,35 +1,32 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	id("org.springframework.boot") version "3.0.5"
-	id("io.spring.dependency-management") version "1.1.0"
-	kotlin("jvm") version "1.7.22"
-	kotlin("plugin.spring") version "1.7.22"
+    id("org.springframework.boot") version "3.0.5"
+    id("io.spring.dependency-management") version "1.1.0"
+    kotlin("jvm") version "1.7.22"
+    kotlin("plugin.spring") version "1.7.22"
 }
 
-group = "org.jmonster"
-version = "1.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
-repositories {
-	mavenCentral()
+allprojects {
+
+    group = "org.jmonster"
+    version = "1.1"
+
+    tasks.withType<KotlinCompile> {
+        kotlinOptions {
+            freeCompilerArgs = listOf("-Xjsr305=strict")
+            jvmTarget = "17"
+        }
+    }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
+
+    repositories {
+        mavenCentral()
+    }
 }
 
-dependencies {
-	implementation("org.springframework.boot:spring-boot-starter")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springframework.boot:spring-boot-starter-validation:3.0.4")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-
-tasks.withType<KotlinCompile> {
-	kotlinOptions {
-		freeCompilerArgs = listOf("-Xjsr305=strict")
-		jvmTarget = "17"
-	}
-}
-
-tasks.withType<Test> {
-	useJUnitPlatform()
-}
