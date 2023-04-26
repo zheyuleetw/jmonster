@@ -1,0 +1,7 @@
+.auto-resize-textarea {
+  resize: none;
+  overflow-y: scroll;
+  height: 50vh;
+}
+
+

@@ -3,6 +3,8 @@ import { MatTable } from '@angular/material/table';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { FormControl, FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { CodePreviewDialogComponent } from '../code-preview-dialog/code-preview-dialog.component';
 
 export interface Column {
   key: string;
@@ -24,7 +26,7 @@ export interface EntityCodeGenerateRequest {
   styleUrls: ['./entity-table.component.css'],
 })
 export class EntityTableComponent {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, public dialog: MatDialog) { }
 
   ngOnInit(): void { }
 
@@ -167,34 +169,8 @@ export class EntityTableComponent {
 
     this.closeButtonTemporarily()
 
-    const data: Column[] = this.columns.map((column, index) => {
-      var type: string;
-      if (column.type === 'VARCHAR') {
-        type = `${column.type}(${this.varcharLengthMap.get(index)})`;
-      } else if (column.type === 'NUMERIC' || column.type === 'DECIMAL') {
-        type = `${column.type}(${this.numericPrecisionMap.get(index)},${this.numericScaleMap.get(index)})`;
-
-      } else {
-        type = column.type;
-      }
-
-      return {
-        key: column.key,
-        name: column.name,
-        type: type,
-        nullable: column.nullable,
-        description: column.description,
-      };
-    });
-
-    const requestBody: EntityCodeGenerateRequest = {
-      tableName: this.tableName,
-      enversAudit: this.enversAudit,
-      columns: data,
-    };
-
     this.http
-      .post(`${environment.apiUrl}/entity/table`, requestBody, {
+      .post(`${environment.apiUrl}/entity/table`, this.generateRequestBody(), {
         responseType: 'arraybuffer',
       })
       .subscribe((response: any) => {
@@ -211,6 +187,7 @@ export class EntityTableComponent {
         URL.revokeObjectURL(url);
       });
   }
+
 
   private closeButtonTemporarily() {
 
@@ -251,5 +228,54 @@ export class EntityTableComponent {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       });
+  }
+
+  preview() {
+
+    if (!this.tableMetaForm.controls.tableName.valid) return;
+
+    this.http
+      .post(`${environment.apiUrl}/entity/table`, this.generateRequestBody(), {
+        responseType: 'json',
+      })
+      .subscribe((response: any) => {
+        this.dialog.open(CodePreviewDialogComponent, {
+          data: { dataList: response, tableName: this.tableName },
+          height: '70%',
+          width: '60%',
+        });
+      });
+
+  }
+
+  private generateRequestBody(): EntityCodeGenerateRequest {
+
+    const data: Column[] = this.columns.map((column, index) => {
+      var type: string;
+      if (column.type === 'VARCHAR') {
+        type = `${column.type}(${this.varcharLengthMap.get(index)})`;
+      } else if (column.type === 'NUMERIC' || column.type === 'DECIMAL') {
+        type = `${column.type}(${this.numericPrecisionMap.get(index)},${this.numericScaleMap.get(index)})`;
+
+      } else {
+        type = column.type;
+      }
+
+      return {
+        key: column.key,
+        name: column.name,
+        type: type,
+        nullable: column.nullable,
+        description: column.description,
+      };
+    });
+
+    const requestBody: EntityCodeGenerateRequest = {
+      tableName: this.tableName,
+      enversAudit: this.enversAudit,
+      columns: data,
+    };
+
+    return requestBody;
   }
 }

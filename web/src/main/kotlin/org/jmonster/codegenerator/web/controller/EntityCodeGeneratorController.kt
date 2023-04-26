@@ -20,13 +20,9 @@ class EntityCodeGeneratorController {
     fun generate(
         @Valid @RequestBody dto: EntityCodeGenerateRequestDto,
         response: HttpServletResponse
-    ): ResponseEntity<ByteArray> {
+    ): List<String> {
         val file = EntityCodeGenerator().generate(dto)
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_OCTET_STREAM
-        headers.contentLength = file.length()
-        headers.setContentDispositionFormData("attachment", "${dto.tableName}.kt")
-        return ResponseEntity.ok().headers(headers).body(Files.readAllBytes(file.toPath()));
+        return file.useLines { it.toList() }
     }
 
     @PostMapping("/text")

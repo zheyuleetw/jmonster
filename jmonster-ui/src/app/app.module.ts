@@ -19,9 +19,11 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatTabsModule } from '@angular/material/tabs';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { ReactiveFormsModule } from '@angular/forms';
+import { CodePreviewDialogComponent } from './code-preview-dialog/code-preview-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
-  declarations: [AppComponent, EntityTableComponent, ToolBarComponent],
+  declarations: [AppComponent, EntityTableComponent, ToolBarComponent, CodePreviewDialogComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -39,6 +41,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     AngularEditorModule,
     ReactiveFormsModule,
     FormsModule,
+    MatDialogModule
   ],
   providers: [],
   bootstrap: [AppComponent],
