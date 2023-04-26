@@ -27,13 +27,12 @@ class EntityCodeGenerator : CodeGenerator {
         className: String,
         vararg unitGenerator: ((className: String) -> String),
     ): String {
-        val code = StringBuilder()
-        unitGenerator.forEach { it ->
-            code.appendLine(it(className))
+        val code = buildString {
+            unitGenerator.forEach {
+                appendLine(it(className))
+            }
         }
-
-        return code.toString()
-
+        return code
     }
 
     private fun generatePackageCode(className: String): String {
@@ -42,98 +41,114 @@ class EntityCodeGenerator : CodeGenerator {
 
     private fun generateImportCode(className: String): String {
 
-        val thisContent = contentDto[className] ?: throw Exception("Content Not Found")
+        val thisContent = contentDto[className]
+        requireNotNull(thisContent) { "Content Not Found" }
 
-        val importCode = StringBuilder()
-        if (enversAudit) {
-            importCode.appendLine("import org.hibernate.envers.Audited")
+        val importCode = buildString {
+            if (enversAudit) appendLine("import org.hibernate.envers.Audited")
+
+            appendLine("import java.util.*").appendLine("import javax.persistence.*")
+
+            if (thisContent.containsMetaColumn()) appendLine("import org.springframework.data.jpa.domain.support.AuditingEntityListener")
+
+            thisContent.map { it.type }
+                .takeIf { it.any { type -> type.equals("timestamp", true) } }
+                ?.run { appendLine("import java.time.LocalDateTime") }
+
+            val columnsName = thisContent.map { it.name }
+            if (columnsName.contains("updated_date")) appendLine("import org.springframework.data.annotation.LastModifiedDate")
+            if (columnsName.contains("updated_user_id")) appendLine("import org.springframework.data.annotation.LastModifiedBy")
+            if (columnsName.contains("created_date")) appendLine("import org.springframework.data.annotation.CreatedDate")
+            if (columnsName.contains("created_user_id")) appendLine("import org.springframework.data.annotation.CreatedBy")
+
+            if (thisContent.any { it.type.contains("JSONB", true) }) {
+                appendLine("import org.hibernate.annotations.Type")
+                    .appendLine("import org.hibernate.annotations.TypeDef")
+                    .appendLine("import org.hibernate.annotations.TypeDefs")
+                    .appendLine("import com.vladmihalcea.hibernate.type.json.JsonBinaryType")
+            }
         }
-        importCode.appendLine("import java.util.*").appendLine("import javax.persistence.*")
 
-        if (thisContent.containsMetaColumn()) importCode.appendLine("import org.springframework.data.jpa.domain.support.AuditingEntityListener")
-        if (thisContent.map { it.type }
-                .any { type -> type.equals("timestamp", true) }) importCode.appendLine("import java.time.LocalDateTime")
-
-        val columnsName = thisContent.map { it.name }
-        if (columnsName.contains("updated_date")) importCode.appendLine("import org.springframework.data.annotation.LastModifiedDate")
-        if (columnsName.contains("updated_user_id")) importCode.appendLine("import org.springframework.data.annotation.LastModifiedBy")
-        if (columnsName.contains("created_date")) importCode.appendLine("import org.springframework.data.annotation.CreatedDate")
-        if (columnsName.contains("created_user_id")) importCode.appendLine("import org.springframework.data.annotation.CreatedBy")
-        if (thisContent.any { it.type.contains("JSONB", true) }) {
-            importCode.appendLine("import org.hibernate.annotations.Type")
-                .appendLine("import org.hibernate.annotations.TypeDef")
-                .appendLine("import org.hibernate.annotations.TypeDefs")
-                .appendLine("import com.vladmihalcea.hibernate.type.json.JsonBinaryType")
-        }
-
-        return importCode.toString()
+        return importCode
     }
 
     private fun generateAnnotationCode(className: String): String {
 
-        val thisContent = contentDto[className] ?: throw Exception("Content Not Found")
+        val thisContent = contentDto[className]
+        requireNotNull(thisContent) { "Content Not Found" }
 
-        val annotationCode = StringBuilder().appendLine("@Entity")
+        val annotationCode = buildString {
 
-        if (enversAudit) {
-            annotationCode.appendLine("@Audited")
+            appendLine("@Entity")
+
+            if (enversAudit) appendLine("@Audited")
+            val uniqueColumns = thisContent.filter { it.key.equals("UK", true) }
+
+            if ((uniqueColumnCount[className] ?: 0) > 1) {
+                val uniqueColumnsString = uniqueColumns.joinToString(",") { "\"${it.name}\"" }
+                appendLine("@Table(name = \"tbl_${className.camelToSnakeCase()}\", uniqueConstraints = [UniqueConstraint(columnNames = [$uniqueColumnsString])])")
+            } else {
+                appendLine("@Table(name = \"tbl_${className.camelToSnakeCase()}\")")
+            }
+
+            if (thisContent.containsMetaColumn()) appendLine("@EntityListeners(AuditingEntityListener::class)")
+            if ((thisContent.groupBy { it.key }["PK"]?.size
+                    ?: 0) > 1
+            ) appendLine("@IdClass(${className}PrimaryKey::class)")
+            if (thisContent.any {
+                    it.type.contains(
+                        "JSONB",
+                        true
+                    )
+                }) appendLine("@TypeDefs(TypeDef(name = \"jsonb\", typeClass = JsonBinaryType::class))")
         }
 
-        val uniqueColumns = thisContent.filter { it.key.equals("UK", true) }
-
-        if ((uniqueColumnCount[className] ?: 0) > 1) {
-            val uniqueColumnsString = uniqueColumns.joinToString(",") { "\"${it.name}\"" }
-            annotationCode.appendLine("@Table(name = \"tbl_${className.camelToSnakeCase()}\", uniqueConstraints = [UniqueConstraint(columnNames = [$uniqueColumnsString])])")
-        } else {
-            annotationCode.appendLine("@Table(name = \"tbl_${className.camelToSnakeCase()}\")")
-        }
-
-        if (thisContent.containsMetaColumn()) annotationCode.appendLine("@EntityListeners(AuditingEntityListener::class)")
-        if ((thisContent.groupBy { it.key }["PK"]?.size ?: 0) > 1) {
-            annotationCode.appendLine("@IdClass(${className}PrimaryKey::class)")
-        }
-        if (thisContent.any { it.type.contains("JSONB", true) }) {
-            annotationCode.appendLine("@TypeDefs(TypeDef(name = \"jsonb\", typeClass = JsonBinaryType::class))")
-        }
-
-        return annotationCode.toString()
+        return annotationCode
 
     }
 
     private fun generateConstructorCode(className: String): String {
-        val constructorCode = StringBuilder()
-        constructorCode.appendLine("data class ${className}(")
-        contentDto[className]?.filter { !metaColumns.contains(it.name) }
-            ?.forEach { constructorCode.appendLine(getColumnDef(className, it)) }
-        constructorCode.appendLine(")")
-        return constructorCode.toString()
+        val constructorCode = buildString {
+            appendLine("data class ${className}(")
+            contentDto[className]
+                ?.filterNot { metaColumns.contains(it.name) }
+                ?.forEach { appendLine(getColumnDef(className, it)) }
+
+            appendLine(")")
+        }
+
+        return constructorCode
     }
 
     private fun generateBodyCode(className: String): String {
-        val bodyCode = StringBuilder()
-        bodyCode.appendLine("{")
-        contentDto[className]?.filter { metaColumns.contains(it.name) }
-            ?.forEach { bodyCode.appendLine(getMetaColumnDef(className, it)) }
-        bodyCode.appendLine("}").appendLine()
-        return bodyCode.toString()
+        val bodyCode = buildString {
+            appendLine("{")
+            contentDto[className]
+                ?.filter { metaColumns.contains(it.name) }
+                ?.forEach { appendLine(getMetaColumnDef(className, it)) }
 
+            appendLine("}").appendLine()
+        }
+        return bodyCode
     }
 
     private fun generatePkCode(className: String): String {
-        val pkCode = StringBuilder()
-        val map = contentDto[className]?.groupBy { it.key } ?: emptyMap()
-        if ((map["PK"]?.size ?: 0) > 1) {
-            pkCode.appendLine("class ${className}PrimaryKey(")
-            map["PK"]!!.forEach { pkCode.appendLine(getPKColumn(it)) }
-            pkCode.appendLine(") : Serializable {").appendLine(getCompositePKConstructor2(map["PK"]!!)).appendLine("}")
+        val pkCode = buildString {
+            val map = contentDto[className]?.groupBy { it.key } ?: emptyMap()
+            val pkColumns = map["PK"] ?: emptyList()
+            if (pkColumns.size > 1) {
+                appendLine("class ${className}PrimaryKey(")
+                pkColumns.forEach { appendLine(getPKColumn(it)) }
+                appendLine(") : Serializable {").appendLine(getCompositePKConstructor2(pkColumns)).appendLine("}")
+            }
         }
-        return pkCode.toString()
 
+        return pkCode
     }
 
     private fun convertType(dbType: String): String {
 
-        return when (dbType.uppercase()) {
+        return when (val dbTypeUpperCase = dbType.uppercase()) {
             "UUID" -> "UUID"
             "JSONB(I18NNAMEMAP)" -> "I18nNameMap"
             "BOOL" -> "Boolean"
@@ -145,35 +160,29 @@ class EntityCodeGenerator : CodeGenerator {
             "INT" -> "Int"
             "BIGINT" -> "Long"
             "DOUBLE PRECISION", "FLOAT8" -> "Double"
-            "DECIMAL" -> "BigDecimal"
+            "DECIMAL", "NUMERIC" -> "BigDecimal"
             "REAL" -> "Float"
             "BYTEA" -> "ByteArray"
             "ENUM" -> "String"
             "JSONB(LIST)" -> "List"
             "JSONB(MAP)" -> "Map"
-            else -> {
-                if (dbType.uppercase().contains("VARCHAR")) {
-                    "String"
-                } else if (dbType.uppercase().contains("NUMERIC") || dbType.uppercase().contains("DECIMAL")) {
-                    "BigDecimal"
-                } else {
-                    "String"
-                }
-            }
+            "VARCHAR" -> "String"
+            else -> "STRING"
         }
 
     }
 
     private fun getColumnDef(className: String, column: Column): String {
-        val columnBlock = StringBuilder()
-        columnBlock.appendLine(if (column.key.equals("PK", true)) "@Id" else "")
-            .appendLine(if (column.type.uppercase().contains("JSONB", true)) "@Type(type = \"jsonb\")" else "")
-            .appendLine(getColumn(className, column)).appendLine(getField(column))
-        return columnBlock.toString()
+        val columnBlock = buildString {
+            appendLine(if (column.key.equals("PK", true)) "@Id" else "")
+                .appendLine(if (column.type.uppercase().contains("JSONB", true)) "@Type(type = \"jsonb\")" else "")
+                .appendLine(getColumn(className, column)).appendLine(getField(column))
+        }
+        return columnBlock
     }
 
     private fun getColumn(className: String, column: Column): String {
-        buildList {
+        return buildList {
             addNameDef(column)
             addVarcharLengthDef(column)
             addNumericPrecisionAndScaleDef(column)
@@ -181,13 +190,11 @@ class EntityCodeGenerator : CodeGenerator {
             addUpdatableDef(column)
             addUniqueDef(className, column)
             addJsonbColumnDef(column)
-        }.let {
-            return "@Column(${it.joinToString(", ")})"
-        }
+        }.let { "@Column(${it.joinToString(", ")})" }
     }
 
     private fun MutableList<String>.addNameDef(column: Column) {
-        this.add("name = \"${column.name}\"")
+        add("name = \"${column.name}\"")
     }
 
     private fun MutableList<String>.addVarcharLengthDef(column: Column) {
@@ -195,7 +202,7 @@ class EntityCodeGenerator : CodeGenerator {
             val regex = Regex("(\\d+)")
             regex.find(column.type)?.let {
                 val (length) = it.groupValues.drop(0)
-                this.add("length=$length")
+                add("length=$length")
             }
         }
     }
@@ -207,34 +214,31 @@ class EntityCodeGenerator : CodeGenerator {
                 val values = it.groupValues
                 val precision = values[1]
                 val scale = values[2]
-                this.add("precision=$precision")
-                this.add("scale=$scale")
+                add("precision=$precision")
+                add("scale=$scale")
             }
         }
     }
 
     private fun MutableList<String>.addNullableDef(column: Column) {
-        if (column.nullable.equals("notnull", true) && column.key != "PK") this.add("nullable = false")
+        if (column.nullable.equals("notnull", true) && column.key != "PK") add("nullable = false")
     }
 
     private fun MutableList<String>.addUpdatableDef(column: Column) {
-        if (column.name.equals("created_date", true) || column.name.equals(
-                "created_user_id", true
-            )
-        ) {
-            this.add("updatable = false")
+        if (column.name.equals("created_date", true) || column.name.equals("created_user_id", true)) {
+            add("updatable = false")
         }
     }
 
     private fun MutableList<String>.addUniqueDef(className: String, column: Column) {
         if (uniqueColumnCount[className] == 1 && column.key.equals("UK", true)) {
-            this.add("unique = true")
+            add("unique = true")
         }
     }
 
     private fun MutableList<String>.addJsonbColumnDef(column: Column) {
         if (column.type.uppercase().contains("JSONB", true)) {
-            this.add("columnDefinition = \"jsonb\"")
+            add("columnDefinition = \"jsonb\"")
         }
     }
 
@@ -244,16 +248,17 @@ class EntityCodeGenerator : CodeGenerator {
     }
 
     private fun getMetaColumnDef(className: String, column: Column): String {
-        val code = StringBuilder()
-        when (column.name) {
-            "updated_date" -> code.appendLine("@LastModifiedDate")
-            "updated_user_id" -> code.appendLine("@LastModifiedBy")
-            "created_date" -> code.appendLine("@CreatedDate")
-            "created_user_id" -> code.appendLine("@CreatedBy")
+        val code = buildString {
+            when (column.name) {
+                "updated_date" -> appendLine("@LastModifiedDate")
+                "updated_user_id" -> appendLine("@LastModifiedBy")
+                "created_date" -> appendLine("@CreatedDate")
+                "created_user_id" -> appendLine("@CreatedBy")
+            }
+            appendLine(getColumn(className, column)).appendLine("lateinit ${getField(column)}".replace(",", ""))
         }
-        code.appendLine(getColumn(className, column)).appendLine("lateinit ${getField(column)}".replace(",", ""))
 
-        return code.toString()
+        return code
     }
 
     private fun getPKColumn(column: Column) =
@@ -295,12 +300,14 @@ class EntityCodeGenerator : CodeGenerator {
     }
 
     override fun generate(args: ApplicationArguments?) {
-        if (args == null) {
-            println("Generate NOTHING")
-            return
+        when {
+            args == null -> {
+                println("Generate NOTHING")
+                return
+            }
+            !preCheck(args) -> return
+            else -> output()
         }
-        if (!preCheck(args)) return
-        output()
     }
 
     override fun generate(dto: RestDto): File {
