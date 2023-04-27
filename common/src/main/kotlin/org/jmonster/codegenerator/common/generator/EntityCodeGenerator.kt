@@ -51,9 +51,10 @@ class EntityCodeGenerator : CodeGenerator {
 
             if (thisContent.containsMetaColumn()) appendLine("import org.springframework.data.jpa.domain.support.AuditingEntityListener")
 
-            thisContent.map { it.type }
-                .takeIf { it.any { type -> type.equals("timestamp", true) } }
-                ?.run { appendLine("import java.time.LocalDateTime") }
+            val types = thisContent.map { it.type }
+            if (types.any { it.equals("timestamp", true) }) {
+                appendLine("import java.time.LocalDateTime")
+            }
 
             val columnsName = thisContent.map { it.name }
             if (columnsName.contains("updated_date")) appendLine("import org.springframework.data.annotation.LastModifiedDate")
@@ -134,13 +135,16 @@ class EntityCodeGenerator : CodeGenerator {
 
     private fun generatePkCode(className: String): String {
         val pkCode = buildString {
-            val map = contentDto[className]?.groupBy { it.key } ?: emptyMap()
-            val pkColumns = map["PK"] ?: emptyList()
-            if (pkColumns.size > 1) {
-                appendLine("class ${className}PrimaryKey(")
-                pkColumns.forEach { appendLine(getPKColumn(it)) }
-                appendLine(") : Serializable {").appendLine(getCompositePKConstructor2(pkColumns)).appendLine("}")
-            }
+            val columnsMap = contentDto[className]?.groupBy { it.key } ?: emptyMap()
+            val pkColumns = columnsMap["PK"] ?: emptyList()
+            pkColumns.takeIf { it.any() }
+                ?.let { columns ->
+                    appendLine("class ${className}PrimaryKey(")
+                    columns.forEach { column -> appendLine(getPKColumn(column)) }
+                    appendLine(") : Serializable {")
+                    appendLine(getCompositePKConstructor2(pkColumns))
+                    appendLine("}")
+                }
         }
 
         return pkCode
@@ -160,17 +164,23 @@ class EntityCodeGenerator : CodeGenerator {
             "INT" -> "Int"
             "BIGINT" -> "Long"
             "DOUBLE PRECISION", "FLOAT8" -> "Double"
-            "DECIMAL", "NUMERIC" -> "BigDecimal"
+            "DECIMAL" -> "BigDecimal"
             "REAL" -> "Float"
             "BYTEA" -> "ByteArray"
             "ENUM" -> "String"
             "JSONB(LIST)" -> "List"
             "JSONB(MAP)" -> "Map"
-            "VARCHAR" -> "String"
-            else -> "STRING"
+            else -> handleTypesWithArguments(dbType)
         }
 
     }
+
+    private fun handleTypesWithArguments(dbType: String): String =
+        when {
+            dbType.uppercase().contains("VARCHAR") -> "String"
+            dbType.uppercase().contains("NUMERIC") || dbType.uppercase().contains("DECIMAL") -> "BigDecimal"
+            else -> "String"
+        }
 
     private fun getColumnDef(className: String, column: Column): String {
         val columnBlock = buildString {
@@ -305,6 +315,7 @@ class EntityCodeGenerator : CodeGenerator {
                 println("Generate NOTHING")
                 return
             }
+
             !preCheck(args) -> return
             else -> output()
         }
