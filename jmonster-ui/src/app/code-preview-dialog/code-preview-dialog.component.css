@@ -1,7 +1,16 @@
 .auto-resize-textarea {
   resize: none;
-  overflow-y: scroll;
   height: 50vh;
 }
 
+.dialog-content-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 100%;
+  width: 100%;
+}
 
+.mat-dialog-content {
+  overflow: hidden !important;
+}

@@ -1,9 +1,11 @@
-<h2 mat-dialog-title>Code Preview</h2>
-<mat-dialog-actions align="end">
-  <button mat-raised-button mat-dialog-close>Back</button>
-  <button mat-raised-button color="primary" [mat-dialog-close]="true" (click)="download()">Download</button>
-</mat-dialog-actions>
-<mat-dialog-content>
+<div class="dialog-content-container">
+  <h2 mat-dialog-title>Code Preview</h2>
+  <mat-dialog-content>
     <!-- TODO 改為程式碼編輯器 -->
     <textarea matInput class="auto-resize-textarea" [(ngModel)]="code"></textarea>
-</mat-dialog-content>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-raised-button mat-dialog-close>Back</button>
+    <button mat-raised-button color="primary" [mat-dialog-close]="true" (click)="download()">Download</button>
+  </mat-dialog-actions>
+</div>
