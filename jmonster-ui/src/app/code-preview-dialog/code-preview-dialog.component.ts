@@ -49,4 +49,8 @@ export class CodePreviewDialogComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 
+  onCodeChanged(value: any) {
+    this.code = value;
+  }
+
 }

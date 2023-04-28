@@ -1,7 +1,7 @@
 <div class="dialog-content-container">
   <h2 mat-dialog-title align="center">Code Preview</h2>
   <mat-dialog-content color="primary">
-    <ngs-code-editor class="auto-resize-textarea" [theme]="codeEditorTheme" [codeModel]="codeEditorModel" [options]="options">
+    <ngs-code-editor class="auto-resize-textarea" [theme]="codeEditorTheme" [codeModel]="codeEditorModel" [options]="options" (valueChanged)="onCodeChanged($event)">
     </ngs-code-editor>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
