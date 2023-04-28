@@ -1,8 +1,8 @@
 <div class="dialog-content-container">
-  <h2 mat-dialog-title>Code Preview</h2>
-  <mat-dialog-content>
-    <!-- TODO 改為程式碼編輯器 -->
-    <textarea matInput class="auto-resize-textarea" [(ngModel)]="code"></textarea>
+  <h2 mat-dialog-title align="center">Code Preview</h2>
+  <mat-dialog-content color="primary">
+    <ngs-code-editor class="auto-resize-textarea" [theme]="codeEditorTheme" [codeModel]="codeEditorModel" [options]="options">
+    </ngs-code-editor>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-raised-button mat-dialog-close>Back</button>

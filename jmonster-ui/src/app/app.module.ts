@@ -21,6 +21,7 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CodePreviewDialogComponent } from './code-preview-dialog/code-preview-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import { CodeEditorModule } from '@ngstack/code-editor';
 
 @NgModule({
   declarations: [AppComponent, EntityTableComponent, ToolBarComponent, CodePreviewDialogComponent],
@@ -41,7 +42,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     AngularEditorModule,
     ReactiveFormsModule,
     FormsModule,
-    MatDialogModule
+    MatDialogModule,
+    CodeEditorModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent],

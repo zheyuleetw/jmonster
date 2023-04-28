@@ -1,5 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { CodeModel } from '@ngstack/code-editor';
 
 
 @Component({
@@ -12,6 +13,20 @@ export class CodePreviewDialogComponent implements OnInit {
   dataList: string[] = [];
   code: string = "";
   tableName: string = "";
+  codeEditorTheme = 'vs';
+  codeEditorModel: CodeModel = {
+    language: 'kotlin',
+    uri: 'main.kt',
+    value: '',
+  };
+
+  options = {
+    linenumbers: true,
+    contextmenu: true,
+    minimap: {
+      enabled: false,
+    },
+  };
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { dataList: string[], tableName: string }) { }
 
@@ -19,6 +34,7 @@ export class CodePreviewDialogComponent implements OnInit {
     this.dataList = this.data.dataList;
     this.code = this.dataList.join("\n");
     this.tableName = this.data.tableName
+    this.codeEditorModel.value = this.code;
   }
 
   download() {
