@@ -137,7 +137,7 @@ class EntityCodeGenerator : CodeGenerator {
         val pkCode = buildString {
             val columnsMap = contentDto[className]?.groupBy { it.key } ?: emptyMap()
             val pkColumns = columnsMap["PK"] ?: emptyList()
-            pkColumns.takeIf { it.any() }
+            pkColumns.takeIf { it.size > 1 }
                 ?.let { columns ->
                     appendLine("class ${className}PrimaryKey(")
                     columns.forEach { column -> appendLine(getPKColumn(column)) }
