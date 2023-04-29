@@ -1,0 +1,13 @@
+<mat-dialog-content color="primary" align="center">
+  <h2 mat-dialog-title align="center">{{message}}</h2>
+  <form class="table-meta-form" [formGroup]="form">
+  <mat-form-field appearance="fill">
+    <mat-label>{{inputLabel}}</mat-label>
+    <input *ngIf="!inputRequired" matInput [placeholder]="inputPlaceHolder" [(ngModel)]="inputData">
+    <input *ngIf="inputRequired" matInput formControlName="inputValue" [placeholder]="inputPlaceHolder" [(ngModel)]="inputData" (ngModelChange)="valid()" required>
+  </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="center">
+  <button mat-raised-button mat-dialog-close [disabled]="disableOK" (click)="send()">OK</button>
+</mat-dialog-actions>

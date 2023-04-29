@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { CodePreviewDialogComponent } from '../code-preview-dialog/code-preview-dialog.component';
+import { WarnDialogComponent } from '../warn-dialog/warn-dialog.component';
 
 export interface Column {
   key: string;
@@ -232,8 +233,24 @@ export class EntityTableComponent {
 
   preview() {
 
-    if (!this.tableMetaForm.controls.tableName.valid) return;
+    if (!this.tableMetaForm.controls.tableName.valid) {
+      const diaglogRef = this.dialog.open(WarnDialogComponent, {
+        data: { message: '請輸入表名稱', showInput: true, inputLabel: '表名稱', inputPlaceHolder: '請使用CamelCase', required: true },
+        disableClose: true,
+      })
+      diaglogRef.afterClosed().subscribe((result: string) => {
+        console.log(result)
+        this.tableName = result;
+        this.requestEnityTableCode();
+      });
+      return;
+    }
 
+    this.requestEnityTableCode();
+
+  }
+
+  private requestEnityTableCode() {
     this.http
       .post(`${environment.apiUrl}/entity/table`, this.generateRequestBody(), {
         responseType: 'json',
@@ -245,7 +262,6 @@ export class EntityTableComponent {
           width: '60%',
         });
       });
-
   }
 
   private generateRequestBody(): EntityCodeGenerateRequest {

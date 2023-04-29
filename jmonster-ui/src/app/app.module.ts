@@ -22,9 +22,10 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CodePreviewDialogComponent } from './code-preview-dialog/code-preview-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { CodeEditorModule } from '@ngstack/code-editor';
+import { WarnDialogComponent } from './warn-dialog/warn-dialog.component';
 
 @NgModule({
-  declarations: [AppComponent, EntityTableComponent, ToolBarComponent, CodePreviewDialogComponent],
+  declarations: [AppComponent, EntityTableComponent, ToolBarComponent, CodePreviewDialogComponent, WarnDialogComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
