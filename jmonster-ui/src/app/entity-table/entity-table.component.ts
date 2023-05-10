@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, Input, Output, EventEmitter } from '@angular/core';
 import { MatTable } from '@angular/material/table';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
@@ -6,20 +6,9 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { CodePreviewDialogComponent } from '../code-preview-dialog/code-preview-dialog.component';
 import { WarnDialogComponent } from '../warn-dialog/warn-dialog.component';
+import { Column } from '../interface/Column';
+import { EntityCodeGenerateByTableRequest } from '../interface/EntityCodeGenerateByTableRequest';
 
-export interface Column {
-  key: string;
-  name: string;
-  type: string;
-  nullable: string;
-  description: string;
-}
-
-export interface EntityCodeGenerateRequest {
-  tableName: string;
-  enversAudit: boolean;
-  columns: Column[];
-}
 
 @Component({
   selector: 'app-entity-table',
@@ -33,10 +22,13 @@ export class EntityTableComponent {
 
   @ViewChild(MatTable) table!: MatTable<Column>;
 
-  tableMetaForm = new FormGroup({
+  @Input() tableName: string = '';
+  @Input() enversAudit: boolean = true;
+  @Input() tableMetaForm = new FormGroup({
     tableName: new FormControl(''),
     enversAudit: new FormControl(''),
   });
+  @Output() tableNameEvent = new EventEmitter<string>();
 
   columns: Column[] = [
     {
@@ -68,7 +60,7 @@ export class EntityTableComponent {
       description: '更新使用者 ID',
     },
   ];
-  tableName: string = '';
+
   text: string = '';
   displayedColumns = [
     'Key',
@@ -78,7 +70,7 @@ export class EntityTableComponent {
     'Description',
     'Delete',
   ];
-  enversAudit: boolean = true;
+
   tableNameValid: boolean = true;
   varcharLengthMap: Map<number, string> = new Map();
   numericPrecisionMap: Map<number, string> = new Map();
@@ -234,23 +226,27 @@ export class EntityTableComponent {
   preview() {
 
     if (!this.tableMetaForm.controls.tableName.valid) {
-      const diaglogRef = this.dialog.open(WarnDialogComponent, {
+      const diagLogRef = this.dialog.open(WarnDialogComponent, {
         data: { message: '請輸入表名稱', showInput: true, inputLabel: '表名稱', inputPlaceHolder: '請使用CamelCase', required: true },
         disableClose: true,
       })
-      diaglogRef.afterClosed().subscribe((result: string) => {
-        console.log(result)
+      diagLogRef.afterClosed().subscribe((result: string) => {
         this.tableName = result;
-        this.requestEnityTableCode();
+        this.emitTableName(this.tableName)
+        this.requestEntityTableCode();
       });
       return;
     }
 
-    this.requestEnityTableCode();
+    this.requestEntityTableCode();
 
   }
 
-  private requestEnityTableCode() {
+  private emitTableName(name: string) {
+    this.tableNameEvent.emit(name)
+  }
+
+  private requestEntityTableCode() {
     this.http
       .post(`${environment.apiUrl}/entity/table`, this.generateRequestBody(), {
         responseType: 'json',
@@ -264,7 +260,7 @@ export class EntityTableComponent {
       });
   }
 
-  private generateRequestBody(): EntityCodeGenerateRequest {
+  private generateRequestBody(): EntityCodeGenerateByTableRequest {
 
     const data: Column[] = this.columns.map((column, index) => {
       var type: string;
@@ -286,7 +282,7 @@ export class EntityTableComponent {
       };
     });
 
-    const requestBody: EntityCodeGenerateRequest = {
+    const requestBody: EntityCodeGenerateByTableRequest = {
       tableName: this.tableName,
       enversAudit: this.enversAudit,
       columns: data,

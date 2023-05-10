@@ -13,7 +13,7 @@ export class CodePreviewDialogComponent implements OnInit {
   dataList: string[] = [];
   code: string = "";
   tableName: string = "";
-  codeEditorTheme = 'vs';
+  codeEditorTheme = 'vs-dark';
   codeEditorModel: CodeModel = {
     language: 'kotlin',
     uri: 'main.kt',

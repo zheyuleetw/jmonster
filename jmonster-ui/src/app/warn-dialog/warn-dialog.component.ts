@@ -37,6 +37,9 @@ export class WarnDialogComponent implements OnInit {
     this.inputLabel = this.data.inputLabel;
     this.inputPlaceHolder = this.data.inputPlaceHolder;
     this.inputRequired = this.data.required;
+    if(!this.showInput){
+      this.disableOK = false;
+    }
   }
 
   send() {

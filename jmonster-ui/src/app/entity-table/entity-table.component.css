@@ -1,5 +1,5 @@
 .demo-table {
-  width: 80%;
+  width: 95%;
 }
 
 .table-container{
@@ -12,7 +12,7 @@
 .button-container {
   display: flex;
   padding-bottom: 16px;
-  padding-top: 16px;
+  padding-top: 5%;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
@@ -87,4 +87,9 @@
   margin-top: 1%;
   width: 100% !important;
   height: 300px !important;
+}
+
+::ng-deep .number-input{
+  width: 80px !important;
+  margin-left: 5px !important;
 }

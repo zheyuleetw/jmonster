@@ -1,13 +1,5 @@
 <div class="table-container">
 
-  <form class="table-meta-form" [formGroup]="tableMetaForm">
-    <mat-form-field class="example-full-width mat-form-field-with-divider">
-      <mat-label>Table Name</mat-label>
-      <input matInput formControlName="tableName" placeholder="請使用camelCase" [(ngModel)]="tableName" required>
-    </mat-form-field>
-    <mat-slide-toggle formControlName="enversAudit" [(ngModel)]="enversAudit">Envers Audit</mat-slide-toggle>
-  </form>
-
   <div class="button-container">
     <button mat-raised-button color="primary" (click)="addEmptyColumn()" class="demo-button">
       Add Empty Column
@@ -80,17 +72,17 @@
             <mat-option value="DECIMAL">DECIMAL</mat-option>
           </mat-select>
         </mat-form-field>
-        <mat-form-field *ngIf="column.type.startsWith('VARCHAR')">
-          <mat-label>請輸入VARCHAR長度</mat-label>
+        <mat-form-field *ngIf="column.type.startsWith('VARCHAR')" class="number-input">
+          <mat-label>長度</mat-label>
           <input matInput required min="2" type="number" (input)="onVarcharLengthChanged($event.target, i)">
         </mat-form-field>
-        <mat-form-field *ngIf="column.type.startsWith('NUMERIC') || column.type.startsWith('DECIMAL')">
-          <mat-label>請輸入總位數</mat-label>
-          <input matInput required min="1" type="number" (input)="onNumericPrecisionChanged($event.target, i)">
+        <mat-form-field *ngIf="column.type.startsWith('NUMERIC') || column.type.startsWith('DECIMAL')" class="number-input">
+          <mat-label>總位數</mat-label>
+          <input matInput required min="1" class="number-input" type="number" (input)="onNumericPrecisionChanged($event.target, i)">
         </mat-form-field>
-        <mat-form-field *ngIf="column.type.startsWith('NUMERIC') || column.type.startsWith('DECIMAL')">
-          <mat-label>請輸入小數位數</mat-label>
-          <input matInput required min="1" type="number" (input)="onNumericScaleChanged($event.target, i)">
+        <mat-form-field *ngIf="column.type.startsWith('NUMERIC') || column.type.startsWith('DECIMAL')" class="number-input">
+          <mat-label>小數位數</mat-label>
+          <input matInput required min="1" class="number-input" type="number" (input)="onNumericScaleChanged($event.target, i)">
         </mat-form-field>
       </td>
     </ng-container>

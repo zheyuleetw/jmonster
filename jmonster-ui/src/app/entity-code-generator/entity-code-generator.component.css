@@ -1,0 +1,25 @@
+.mat-tab-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 3vh;
+    width: 100%;
+}
+
+.table-meta-form{
+    display: flex;
+    margin-top: 1%;
+    margin-bottom: 1%;
+    align-items: center;
+    justify-content: space-between;
+    width:30%;
+  }
+

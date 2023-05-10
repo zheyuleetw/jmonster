@@ -7,5 +7,4 @@ import java.io.File
 interface CodeGenerator {
     fun generate(args: ApplicationArguments?)
     fun generate(dto: RestDto): File
-    fun generate(tableName: String, text: String): File
 }

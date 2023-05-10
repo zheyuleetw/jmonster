@@ -1,6 +1,6 @@
 <mat-dialog-content color="primary" align="center">
   <h2 mat-dialog-title align="center">{{message}}</h2>
-  <form class="table-meta-form" [formGroup]="form">
+  <form class="table-meta-form" [formGroup]="form" *ngIf="showInput">
   <mat-form-field appearance="fill">
     <mat-label>{{inputLabel}}</mat-label>
     <input *ngIf="!inputRequired" matInput [placeholder]="inputPlaceHolder" [(ngModel)]="inputData">

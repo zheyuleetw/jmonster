@@ -1,0 +1,17 @@
+<div class="container">
+    <form class="table-meta-form" [formGroup]="tableMetaForm">
+        <mat-form-field class="table-name-input">
+            <mat-label>Table Name</mat-label>
+            <input matInput formControlName="tableName" placeholder="請使用camelCase" [(ngModel)]="tableName" required>
+        </mat-form-field>
+        <mat-slide-toggle formControlName="enversAudit" [(ngModel)]="enversAudit">Envers Audit</mat-slide-toggle>
+    </form>
+    <mat-tab-group mat-align-tabs="center" animationDuration="0ms">
+        <mat-tab label="Table">
+            <app-entity-table [tableName]="tableName" [tableMetaForm]="tableMetaForm" [enversAudit]="enversAudit"
+                (tableNameEvent)="setTableName($event)"></app-entity-table></mat-tab>
+        <mat-tab label="PlainText">
+            <app-plain-text [tableName]="tableName" [tableMetaForm]="tableMetaForm" [enversAudit]="enversAudit" (tableNameEvent)="setTableName($event)"></app-plain-text>
+        </mat-tab>
+    </mat-tab-group>
+</div>

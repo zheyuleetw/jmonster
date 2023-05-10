@@ -23,9 +23,11 @@ import { CodePreviewDialogComponent } from './code-preview-dialog/code-preview-d
 import { MatDialogModule } from '@angular/material/dialog';
 import { CodeEditorModule } from '@ngstack/code-editor';
 import { WarnDialogComponent } from './warn-dialog/warn-dialog.component';
+import { PlainTextComponent } from './plain-text/plain-text.component';
+import { EntityCodeGeneratorComponent } from './entity-code-generator/entity-code-generator.component';
 
 @NgModule({
-  declarations: [AppComponent, EntityTableComponent, ToolBarComponent, CodePreviewDialogComponent, WarnDialogComponent],
+  declarations: [AppComponent, EntityTableComponent, ToolBarComponent, CodePreviewDialogComponent, WarnDialogComponent, PlainTextComponent, EntityCodeGeneratorComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,

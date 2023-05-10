@@ -2,7 +2,8 @@ package org.jmonster.codegenerator.common.generator
 
 import org.jmonster.codegenerator.common.model.dto.common.RestDto
 import org.jmonster.codegenerator.common.model.dto.entity.Column
-import org.jmonster.codegenerator.common.model.dto.entity.EntityCodeGenerateRequestDto
+import org.jmonster.codegenerator.common.model.dto.entity.EntityCodeGenerateByPlainTextRequestDto
+import org.jmonster.codegenerator.common.model.dto.entity.EntityCodeGenerateByTableRequestDto
 import org.springframework.boot.ApplicationArguments
 import java.io.File
 import java.nio.file.Files
@@ -13,10 +14,11 @@ class EntityCodeGenerator : CodeGenerator {
 
     private var source: List<String> = listOf()
     private var destination: String = ""
-    private var delimiter: String = ""
+    private var delimiter: String = "\t"
     private var packageDeclaration: String = ""
     private var contentDto: MutableMap<String, List<Column>> = mutableMapOf()
     private var enversAudit: Boolean = false
+    private var enversAuditMap: MutableMap<String, Boolean> = mutableMapOf()
     private val metaColumns = listOf("created_date", "created_user_id", "updated_date", "updated_user_id")
     private fun List<Column>.containsMetaColumn() = this.any { metaColumns.contains(it.name) }
     private val camelRegex = "(?<=[a-zA-Z])[A-Z]".toRegex()
@@ -45,7 +47,7 @@ class EntityCodeGenerator : CodeGenerator {
         requireNotNull(thisContent) { "Content Not Found" }
 
         val importCode = buildString {
-            if (enversAudit) appendLine("import org.hibernate.envers.Audited")
+            if (enversAuditMap[className] == true) appendLine("import org.hibernate.envers.Audited")
 
             appendLine("import java.util.*").appendLine("import javax.persistence.*")
 
@@ -82,7 +84,7 @@ class EntityCodeGenerator : CodeGenerator {
 
             appendLine("@Entity")
 
-            if (enversAudit) appendLine("@Audited")
+            if (enversAuditMap[className] == true) appendLine("@Audited")
             val uniqueColumns = thisContent.filter { it.key.equals("UK", true) }
 
             if ((uniqueColumnCount[className] ?: 0) > 1) {
@@ -322,15 +324,25 @@ class EntityCodeGenerator : CodeGenerator {
     }
 
     override fun generate(dto: RestDto): File {
-        if (dto !is EntityCodeGenerateRequestDto) throw Exception("ERR_UNKNOWN")
+        return when (dto) {
+            is EntityCodeGenerateByTableRequestDto -> {
+                generateByTable(dto)
+            }
 
-        // [0] -> PK or UK or empty
-        // [1] -> name
-        // [2] -> type
-        // [3] -> null or nonnull
-        // [4] -> description
+            is EntityCodeGenerateByPlainTextRequestDto -> {
+                generateByPlainText(dto.tableName, dto.text, dto.enversAudit)
+            }
 
-        enversAudit = dto.enversAudit
+            else -> {
+                throw Exception("Unknown dto type")
+            }
+        }
+
+    }
+
+    private fun generateByTable(dto: EntityCodeGenerateByTableRequestDto): File {
+
+        enversAuditMap[dto.tableName] = dto.enversAudit
         contentDto[dto.tableName] = dto.columns
         uniqueColumnCount[dto.tableName] = dto.columns.filter { it.key.equals("UK", true) }.size
 
@@ -348,18 +360,19 @@ class EntityCodeGenerator : CodeGenerator {
         val tempFile: Path = Files.createTempFile(dto.tableName, ".kt")
         Files.write(tempFile, listOf(code))
         return tempFile.toFile()
-
     }
 
-    override fun generate(tableName: String, text: String): File {
+    private fun generateByPlainText(tableName: String, text: String, enversAudit: Boolean): File {
         // [0] -> PK or UK or empty
         // [1] -> name
         // [2] -> type
         // [3] -> null or nonnull
         // [4] -> description
-        // TODO complete
-        val contentArg = text.split("\\r?\\n").map { line -> line.split(delimiter).map { it.trim() } }
-        contentDto[tableName] = contentArg.map { line ->
+        enversAuditMap[tableName] = enversAudit
+        val contentArg = text.split("\n").map { line ->
+            line.split(delimiter).map { it.trim() }
+        }
+        contentDto[tableName] = contentArg.filter { it.size == 5 }.map { line ->
             Column(
                 key = line[0].trim(),
                 name = line[1].trim(),
@@ -492,7 +505,11 @@ class EntityCodeGenerator : CodeGenerator {
 
     private fun preCheckEnverAudit(args: ApplicationArguments): Boolean {
         val enversAuditArg = args.getOptionValues("enversAudit")
-        enversAudit = enversAuditArg?.firstOrNull()?.toBoolean() ?: false
+        val source = args.getOptionValues("source")
+        source.forEach {
+            val thisClassName = it.split(".")[0]
+            enversAuditMap[thisClassName] = enversAuditArg?.firstOrNull()?.toBoolean() ?: false
+        }
         return true
     }
 
