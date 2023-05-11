@@ -15,9 +15,9 @@ class EntityCodeGenerator : CodeGenerator {
     private var source: List<String> = listOf()
     private var destination: String = ""
     private var delimiter: String = "\t"
+    private var tab: String = "\t"
     private var packageDeclaration: String = ""
     private var contentDto: MutableMap<String, List<Column>> = mutableMapOf()
-    private var enversAudit: Boolean = false
     private var enversAuditMap: MutableMap<String, Boolean> = mutableMapOf()
     private val metaColumns = listOf("created_date", "created_user_id", "updated_date", "updated_user_id")
     private fun List<Column>.containsMetaColumn() = this.any { metaColumns.contains(it.name) }
@@ -125,12 +125,18 @@ class EntityCodeGenerator : CodeGenerator {
 
     private fun generateBodyCode(className: String): String {
         val bodyCode = buildString {
-            appendLine("{")
-            contentDto[className]
-                ?.filter { metaColumns.contains(it.name) }
-                ?.forEach { appendLine(getMetaColumnDef(className, it)) }
 
-            appendLine("}").appendLine()
+            val columns = contentDto[className]
+                ?.filter { metaColumns.contains(it.name) }
+                ?.map { getMetaColumnDef(className, it) }
+
+            if (!columns.isNullOrEmpty()) {
+                appendLine("{")
+                columns.forEach { appendLine(it) }
+                appendLine("}")
+            }
+
+            appendLine()
         }
         return bodyCode
     }
@@ -142,9 +148,9 @@ class EntityCodeGenerator : CodeGenerator {
             pkColumns.takeIf { it.size > 1 }
                 ?.let { columns ->
                     appendLine("class ${className}PrimaryKey(")
-                    columns.forEach { column -> appendLine(getPKColumn(column)) }
+                    columns.forEach { column -> appendLine("$tab${getPKColumn(column)}") }
                     appendLine(") : Serializable {")
-                    appendLine(getCompositePKConstructor2(pkColumns))
+                    appendLine("$tab${getCompositePKConstructor(pkColumns)}")
                     appendLine("}")
                 }
         }
@@ -186,9 +192,10 @@ class EntityCodeGenerator : CodeGenerator {
 
     private fun getColumnDef(className: String, column: Column): String {
         val columnBlock = buildString {
-            appendLine(if (column.key.equals("PK", true)) "@Id" else "")
-                .appendLine(if (column.type.uppercase().contains("JSONB", true)) "@Type(type = \"jsonb\")" else "")
-                .appendLine(getColumn(className, column)).appendLine(getField(column))
+            if (column.key.equals("PK", true)) appendLine("$tab@Id")
+            if (column.type.uppercase().contains("JSONB", true)) appendLine("$tab@Type(type = \"jsonb\")")
+            appendLine("$tab${getColumn(className, column)}")
+            appendLine("$tab${getField(column)}")
         }
         return columnBlock
     }
@@ -262,12 +269,13 @@ class EntityCodeGenerator : CodeGenerator {
     private fun getMetaColumnDef(className: String, column: Column): String {
         val code = buildString {
             when (column.name) {
-                "updated_date" -> appendLine("@LastModifiedDate")
-                "updated_user_id" -> appendLine("@LastModifiedBy")
-                "created_date" -> appendLine("@CreatedDate")
-                "created_user_id" -> appendLine("@CreatedBy")
+                "updated_date" -> appendLine("$tab@LastModifiedDate")
+                "updated_user_id" -> appendLine("$tab@LastModifiedBy")
+                "created_date" -> appendLine("$tab@CreatedDate")
+                "created_user_id" -> appendLine("$tab@CreatedBy")
             }
-            appendLine(getColumn(className, column)).appendLine("lateinit ${getField(column)}".replace(",", ""))
+            appendLine("$tab${getColumn(className, column)}")
+            appendLine("${tab}lateinit ${getField(column)}".replace(",", ""))
         }
 
         return code
@@ -276,15 +284,26 @@ class EntityCodeGenerator : CodeGenerator {
     private fun getPKColumn(column: Column) =
         "var ${column.name.snakeToLowerCamelCase()}: ${convertType(column.type)},"
 
-    private fun getCompositePKConstructor2(column: List<Column>) =
+    private fun getCompositePKConstructor(column: List<Column>) =
         "constructor() : this(${column.joinToString(", ") { convertToConstructorParam(it.type) }})"
 
     private fun convertToConstructorParam(dbType: String): String {
         return when (dbType.uppercase()) {
             "UUID" -> "UUID.randomUUID()"
-            "JSONB" -> "\"\""
+            "JSONB(I18NNAMEMAP)" -> "I18nNameMap()"
             "BOOL" -> "false"
             "TIMESTAMP" -> "LocalDateTime.now()"
+            "DATETIME" -> "LocalDateTime.now()"
+            "DATE" -> "LocalDate.now()"
+            "TIME" -> "LocalTime.now()"
+            "TEXT" -> "\"\""
+            "INT" -> "0"
+            "BIGINT" -> "0"
+            "DOUBLE PRECISION", "FLOAT8" -> "0.0"
+            "DECIMAL" -> "BigDecimal.ZERO"
+            "REAL" -> "0.0"
+            "BYTEA" -> "ByteArray(0)"
+            "ENUM" -> "\"\""
             else -> {
                 "\"\""
             }
