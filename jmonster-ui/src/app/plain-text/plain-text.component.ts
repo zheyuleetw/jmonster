@@ -8,6 +8,7 @@ import { WarnDialogComponent } from '../warn-dialog/warn-dialog.component';
 import { CodePreviewDialogComponent } from '../code-preview-dialog/code-preview-dialog.component';
 import { Column } from '../interface/Column';
 import { EntityCodeGenerateByPlainTextRequest } from '../interface/EntityCodeGenerateByPlainTextRequest';
+import { DialogIconType } from '../enum/DialogIconType';
 
 @Component({
   selector: 'app-plain-text',
@@ -85,7 +86,7 @@ export class PlainTextComponent implements OnInit {
 
     if(this.code.trim() === '') {
       const diagLogRef = this.dialog.open(WarnDialogComponent, {
-        data: { message: '請輸入內容', showInput: false, inputLabel: '表名稱', inputPlaceHolder: '請使用CamelCase', required: false },
+        data: { message: '請輸入內容', showInput: false, icon: DialogIconType.WARN },
       })
       return;
     }

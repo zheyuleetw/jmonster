@@ -2,6 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormControl, FormGroup } from '@angular/forms';
 import { EntityTableComponent } from '../entity-table/entity-table.component';
+import { DialogIconType } from '../enum/DialogIconType';
 
 @Component({
   selector: 'app-warn-dialog',
@@ -17,6 +18,7 @@ export class WarnDialogComponent implements OnInit {
       inputLabel: string,
       inputPlaceHolder: string,
       required: boolean,
+      icon: DialogIconType,
     },
     private dialogRef: MatDialogRef<EntityTableComponent>) { }
 
@@ -30,6 +32,7 @@ export class WarnDialogComponent implements OnInit {
   form = new FormGroup({
     inputValue: new FormControl(''),
   });
+  icon: DialogIconType = DialogIconType.INFO
 
   ngOnInit(): void {
     this.message = this.data.message;
@@ -37,9 +40,10 @@ export class WarnDialogComponent implements OnInit {
     this.inputLabel = this.data.inputLabel;
     this.inputPlaceHolder = this.data.inputPlaceHolder;
     this.inputRequired = this.data.required;
-    if(!this.showInput){
+    if (!this.showInput) {
       this.disableOK = false;
     }
+    this.icon = this.data.icon;
   }
 
   send() {

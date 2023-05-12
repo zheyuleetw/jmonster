@@ -8,6 +8,7 @@ import { CodePreviewDialogComponent } from '../code-preview-dialog/code-preview-
 import { WarnDialogComponent } from '../warn-dialog/warn-dialog.component';
 import { Column } from '../interface/Column';
 import { EntityCodeGenerateByTableRequest } from '../interface/EntityCodeGenerateByTableRequest';
+import { DialogIconType } from '../enum/DialogIconType';
 
 
 @Component({
@@ -225,9 +226,17 @@ export class EntityTableComponent {
 
   preview() {
 
+    if (this.columns.length === 0) {
+      this.dialog.open(WarnDialogComponent, {
+        data: { message: '至少輸入一個欄位', showInput: false, icon: DialogIconType.WARN },
+        disableClose: false,
+      })
+      return
+    }
+
     if (!this.tableMetaForm.controls.tableName.valid) {
       const diagLogRef = this.dialog.open(WarnDialogComponent, {
-        data: { message: '請輸入表名稱', showInput: true, inputLabel: '表名稱', inputPlaceHolder: '請使用CamelCase', required: true },
+        data: { message: '請輸入表名稱', showInput: true, inputLabel: '表名稱', inputPlaceHolder: '請使用CamelCase', required: true, icon: DialogIconType.INFO },
         disableClose: true,
       })
       diagLogRef.afterClosed().subscribe((result: string) => {
