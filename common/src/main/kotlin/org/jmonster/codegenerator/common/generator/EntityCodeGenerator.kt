@@ -208,7 +208,7 @@ class EntityCodeGenerator : CodeGenerator {
             addNullableDef(column)
             addUpdatableDef(column)
             addUniqueDef(className, column)
-            addJsonbColumnDef(column)
+            addColumnDef(column)
         }.let { "@Column(${it.joinToString(", ")})" }
     }
 
@@ -255,9 +255,12 @@ class EntityCodeGenerator : CodeGenerator {
         }
     }
 
-    private fun MutableList<String>.addJsonbColumnDef(column: Column) {
+    private fun MutableList<String>.addColumnDef(column: Column) {
         if (column.type.uppercase().contains("JSONB", true)) {
             add("columnDefinition = \"jsonb\"")
+        }
+        if (column.type.uppercase().contains("text", true)) {
+            add("columnDefinition = \"text\"")
         }
     }
 
