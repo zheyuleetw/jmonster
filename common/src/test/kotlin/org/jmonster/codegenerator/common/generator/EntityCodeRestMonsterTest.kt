@@ -2,10 +2,11 @@ package org.jmonster.codegenerator.common.generator
 
 import org.jmonster.codegenerator.common.model.dto.entity.Column
 import org.jmonster.codegenerator.common.model.dto.entity.EntityCodeGenerateByTableRequestDto
+import org.jmonster.codegenerator.common.monster.EntityCodeRestMonster
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 
-class EntityCodeGeneratorTest {
+class EntityCodeRestMonsterTest {
 
     @Test
     fun test_generate_by_table_annotations() {
@@ -33,14 +34,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
         assertAll(
-            { assert(lines.any{it.contains("@Entity")}) { "Failed to generate annotation @Entity" } },
-            { assert(lines.any{it.contains("@Audited")}) { "Failed to generate annotation @Audited" } },
-            { assert(lines.any{it.contains("@IdClass(shibaPrimaryKey::class)")}) { "Failed to generate annotation @IdClass" } },
+            { assert(result.any { it.contains("@Entity") }) { "Failed to generate annotation @Entity" } },
+            { assert(result.any { it.contains("@Audited") }) { "Failed to generate annotation @Audited" } },
+            { assert(result.any { it.contains("@IdClass(shibaPrimaryKey::class)") }) { "Failed to generate annotation @IdClass" } },
         )
     }
 
@@ -64,11 +64,10 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("@Table(name = \"tbl_shiba\")")
+        val idIndex = result.indexOf("@Table(name = \"tbl_shiba\")")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate table name" } },
         )
@@ -94,17 +93,16 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Id")
+        val idIndex = result.indexOf("\t@Id")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Id [UUID]" } },
             {
-                assert(lines[idIndex + 1].contains("@Column(name = \"shiba_id\")")) { "Failed to generate @Column [UUID]" }
+                assert(result[idIndex + 1].contains("@Column(name = \"shiba_id\")")) { "Failed to generate @Column [UUID]" }
             },
-            { assert(lines[idIndex + 2].contains("var shibaId: UUID,")) { "Failed to generate field [UUID]" } },
+            { assert(result[idIndex + 2].contains("var shibaId: UUID,")) { "Failed to generate field [UUID]" } },
 
             )
 
@@ -129,14 +127,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_id\", length=200)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_id\", length=200)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [varchar(200)?]" } },
-            { assert(lines[idIndex + 1].contains("var shibaId: String?,")) { "Failed to generate field [String?]" } },
+            { assert(result[idIndex + 1].contains("var shibaId: String?,")) { "Failed to generate field [String?]" } },
         )
 
     }
@@ -160,14 +157,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_deposit\", precision=19, scale=2)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_deposit\", precision=19, scale=2)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [numeric(19,2)]" } },
-            { assert(lines[idIndex + 1].contains("var shibaDeposit: BigDecimal?,")) { "Failed to generate field [BigDecimal?]" } },
+            { assert(result[idIndex + 1].contains("var shibaDeposit: BigDecimal?,")) { "Failed to generate field [BigDecimal?]" } },
         )
 
     }
@@ -191,16 +187,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().let {
-            it.generate(dto = request)
-        }
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"cute\", nullable = false)")
+        val idIndex = result.indexOf("\t@Column(name = \"cute\", nullable = false)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [bool]" } },
-            { assert(lines[idIndex + 1].contains("var cute: Boolean,")) { "Failed to generate field [Boolean?]" } },
+            { assert(result[idIndex + 1].contains("var cute: Boolean,")) { "Failed to generate field [Boolean?]" } },
         )
 
     }
@@ -224,16 +217,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().let {
-            it.generate(dto = request)
-        }
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_birth_day\", nullable = false)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_birth_day\", nullable = false)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [timestamp]" } },
-            { assert(lines[idIndex + 1].contains("var shibaBirthDay: LocalDateTime,")) { "Failed to generate field [LocalDateTime]" } },
+            { assert(result[idIndex + 1].contains("var shibaBirthDay: LocalDateTime,")) { "Failed to generate field [LocalDateTime]" } },
         )
 
     }
@@ -257,14 +247,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_birth_day\", nullable = false)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_birth_day\", nullable = false)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [datetime]" } },
-            { assert(lines[idIndex + 1].contains("var shibaBirthDay: LocalDateTime,")) { "Failed to generate field [LocalDateTime]" } },
+            { assert(result[idIndex + 1].contains("var shibaBirthDay: LocalDateTime,")) { "Failed to generate field [LocalDateTime]" } },
         )
 
     }
@@ -288,14 +277,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_day\", nullable = false)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_day\", nullable = false)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [date]" } },
-            { assert(lines[idIndex + 1].contains("var shibaDay: LocalDate,")) { "Failed to generate field [LocalDate]" } },
+            { assert(result[idIndex + 1].contains("var shibaDay: LocalDate,")) { "Failed to generate field [LocalDate]" } },
         )
 
     }
@@ -319,14 +307,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_time\", nullable = false)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_time\", nullable = false)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [time]" } },
-            { assert(lines[idIndex + 1].contains("var shibaTime: LocalTime,")) { "Failed to generate field [LocalTime]" } },
+            { assert(result[idIndex + 1].contains("var shibaTime: LocalTime,")) { "Failed to generate field [LocalTime]" } },
         )
 
     }
@@ -350,14 +337,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_say\", nullable = false, columnDefinition = \"text\")")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_say\", nullable = false, columnDefinition = \"text\")")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [text]" } },
-            { assert(lines[idIndex + 1].contains("var shibaSay: String,")) { "Failed to generate field [String]" } },
+            { assert(result[idIndex + 1].contains("var shibaSay: String,")) { "Failed to generate field [String]" } },
         )
 
     }
@@ -381,14 +367,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_lucky_number\", nullable = false)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_lucky_number\", nullable = false)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [int]" } },
-            { assert(lines[idIndex + 1].contains("var shibaLuckyNumber: Int,")) { "Failed to generate field [Int]" } },
+            { assert(result[idIndex + 1].contains("var shibaLuckyNumber: Int,")) { "Failed to generate field [Int]" } },
         )
 
     }
@@ -412,14 +397,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_lucky_number\", nullable = false)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_lucky_number\", nullable = false)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [bigint]" } },
-            { assert(lines[idIndex + 1].contains("var shibaLuckyNumber: Long,")) { "Failed to generate field [Long]" } },
+            { assert(result[idIndex + 1].contains("var shibaLuckyNumber: Long,")) { "Failed to generate field [Long]" } },
         )
 
     }
@@ -443,14 +427,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_lucky_number\", nullable = false)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_lucky_number\", nullable = false)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [double precision]" } },
-            { assert(lines[idIndex + 1].contains("var shibaLuckyNumber: Double,")) { "Failed to generate field [Double]" } },
+            { assert(result[idIndex + 1].contains("var shibaLuckyNumber: Double,")) { "Failed to generate field [Double]" } },
         )
 
     }
@@ -474,14 +457,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_lucky_number\", nullable = false)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_lucky_number\", nullable = false)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [float8]" } },
-            { assert(lines[idIndex + 1].contains("var shibaLuckyNumber: Double,")) { "Failed to generate field [Double]" } },
+            { assert(result[idIndex + 1].contains("var shibaLuckyNumber: Double,")) { "Failed to generate field [Double]" } },
         )
 
     }
@@ -505,14 +487,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_lucky_number\", nullable = false)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_lucky_number\", nullable = false)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [real]" } },
-            { assert(lines[idIndex + 1].contains("var shibaLuckyNumber: Float,")) { "Failed to generate field [Float]" } },
+            { assert(result[idIndex + 1].contains("var shibaLuckyNumber: Float,")) { "Failed to generate field [Float]" } },
         )
 
     }
@@ -536,14 +517,13 @@ class EntityCodeGeneratorTest {
         )
 
         // execute
-        val result = EntityCodeGenerator().generate(dto = request)
+        val result = EntityCodeRestMonster(request).produce()
 
         // assert
-        val lines = result.useLines { it.toList() }
-        val idIndex = lines.indexOf("\t@Column(name = \"shiba_lucky_number_array\", nullable = false)")
+        val idIndex = result.indexOf("\t@Column(name = \"shiba_lucky_number_array\", nullable = false)")
         assertAll(
             { assert(idIndex != -1) { "Failed to generate @Column [bytea]" } },
-            { assert(lines[idIndex + 1].contains("var shibaLuckyNumberArray: ByteArray,")) { "Failed to generate field [ByteArray]" } },
+            { assert(result[idIndex + 1].contains("var shibaLuckyNumberArray: ByteArray,")) { "Failed to generate field [ByteArray]" } },
         )
 
     }
