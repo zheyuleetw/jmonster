@@ -13,7 +13,7 @@ class EntityCodeCLIMonster(raw: ApplicationArguments) : Monster<Unit, Applicatio
     private var packageDeclaration: String = ""
     private var enversAuditMap: MutableMap<String, Boolean> = mutableMapOf()
 
-    override fun digestion(raw: ApplicationArguments?): Boolean {
+    override fun digest(raw: ApplicationArguments?): Boolean {
         raw?.let {
             val sourceValid = preCheckSource(raw)
             if (!sourceValid) return false
@@ -32,7 +32,7 @@ class EntityCodeCLIMonster(raw: ApplicationArguments) : Monster<Unit, Applicatio
 
     override fun produce() {
         raw?.let {
-            if (!digestion(it)) return
+            if (!digest(it)) return
             output()
         } ?: throw Exception("Raw is needed to produce code")
     }

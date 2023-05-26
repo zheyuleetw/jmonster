@@ -18,7 +18,7 @@ class EntityCodeRestMonster(raw: RestDto) : Monster<List<String>, RestDto>(raw) 
     private val metaColumns = listOf("created_date", "created_user_id", "updated_date", "updated_user_id")
     private fun List<Column>.containsMetaColumn() = this.any { metaColumns.contains(it.name) }
     private var uniqueColumnCount: MutableMap<String, Int> = mutableMapOf()
-    override fun digestion(raw: RestDto): Boolean {
+    override fun digest(raw: RestDto): Boolean {
         return when (raw) {
             is EntityCodeGenerateByTableRequestDto -> {
                 digestRawTable(raw)
@@ -36,7 +36,7 @@ class EntityCodeRestMonster(raw: RestDto) : Monster<List<String>, RestDto>(raw) 
 
     override fun produce(): List<String> {
         raw?.let {
-            digestion(it)
+            digest(it)
             return composeCode(
                 this.tableName,
                 this::generatePackageCode,
@@ -46,7 +46,7 @@ class EntityCodeRestMonster(raw: RestDto) : Monster<List<String>, RestDto>(raw) 
                 this::generateBodyCode,
                 this::generatePkCode
             ).split("\n")
-        } ?: throw Exception("Raw is needed to do magic")
+        } ?: throw Exception("Raw is needed to product code")
     }
 
     private fun composeCode(
