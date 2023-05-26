@@ -1,3 +1,5 @@
+![Test Badge](https://github.com/zheyuleetw/jmonster/actions/workflows/gradle.yml/badge.svg)
+
 # Kotlin/Java Code Generator 程式碼產生器
 
 這個專案提供多種 Kotlin/Java 的程式碼產生功能，雖然現在只有 EntityCodeGenerator 而且只能產 Kotlin :laughing:，未來會有更多的產生器 :muscle:
