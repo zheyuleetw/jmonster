@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class EntityCodeGenerator : CodeGenerator {
+class EntityCodeGenerator {
     fun <O, R> generate(monster: Monster<O, R>): O {
         return monster.produce()
     }
