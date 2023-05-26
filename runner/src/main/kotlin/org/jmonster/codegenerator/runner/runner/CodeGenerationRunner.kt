@@ -17,7 +17,7 @@ class CodeGenerationRunner : ApplicationRunner {
         }
 
         args.getOptionValues("type").firstOrNull()?.let {
-            val generator: CodeGenerator? = when (it) {
+             when (it) {
                 "entity" -> EntityCodeGenerator()
                 else -> null
             }
